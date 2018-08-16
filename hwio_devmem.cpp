@@ -1,6 +1,3 @@
-// Copyright (c) 2016 Brno University of Technology
-// Author(s): Roman Selecky <xselec01@stud.fit.vutbr.cz>
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
