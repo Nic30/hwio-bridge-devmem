@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
         throw std::runtime_error("Can not initialize HWIO");
     }
 
-    size_t devIndex = 0;
+    int devIndex = -1;
     bool useAll = false;
     bool listAvailable = false;
 
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
         }
     }
     if (nonOpts.size() < 1) {
-        std::cout << "[Error] at least compatibility string is required"
+        std::cerr << "[Error] at least compatibility string is required"
                 << std::endl;
         print_help();
         delete bus;
@@ -98,7 +98,8 @@ int main(int argc, char **argv) {
     if (listAvailable) {
         std::cout << "Available devices (" << devs.size() << "): " << std::endl;
         for (auto d : devs) {
-            std::cout << "    " << d->to_str() << std::endl;
+            std::cout << d->to_str() << std::endl;
+            std::cout << "----------------------------" << std::endl;
         }
     }
 
@@ -106,8 +107,19 @@ int main(int argc, char **argv) {
         for (auto d : devs)
             dev_to_use.push_back(d);
     } else {
-        if (devIndex >= devs.size()) {
-            std::cout << "Can not use device " << devIndex
+    	if (devIndex < 0) {
+    		if (devs.size() <= 1) {
+    			devIndex = 0;
+    		} else {
+    			std::cerr << "Platform has multiple devices, device index specification is required (devices_cnt="
+    					<< devs.size() << ")" << std::endl;
+                delete bus;
+                exit(1);
+    		}
+
+    	}
+        if ((unsigned)devIndex >= devs.size()) {
+            std::cerr << "Can not use device " << devIndex
                     << " because platform has only " << devs.size()
                     << " devices" << std::endl;
             delete bus;
