@@ -79,6 +79,9 @@ int main(int argc, char **argv) {
     std::vector<char *> nonOpts;
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] != '-') {
+        	if (i > 1 && strcmp(argv[i-1], "-d") == 0) {
+        		continue;
+        	}
             nonOpts.push_back(argv[i]);
         }
     }
@@ -121,7 +124,7 @@ int main(int argc, char **argv) {
         if ((unsigned)devIndex >= devs.size()) {
             std::cerr << "Can not use device " << devIndex
                     << " because platform has only " << devs.size()
-                    << " devices" << std::endl;
+                    << " devices (compat=" << compat[0].to_str() << ")" << std::endl;
             delete bus;
             exit(1);
         } else {
