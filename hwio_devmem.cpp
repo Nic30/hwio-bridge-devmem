@@ -107,29 +107,15 @@ int main(int argc, char **argv) {
     }
 
     if (useAll) {
-        for (auto d : devs)
-            dev_to_use.push_back(d);
+        dev_to_use = devs;
     } else {
-    	if (devIndex < 0) {
-    		if (devs.size() <= 1) {
-    			devIndex = 0;
-    		} else {
-    			std::cerr << "Platform has multiple devices, device index specification is required (devices_cnt="
-    					<< devs.size() << ")" << std::endl;
-                delete bus;
-                exit(1);
-    		}
-
+    	try {
+    		dev_to_use = hwio_select_devs_from_vector(devs, devIndex);
+    	} catch (const std::exception& e) {
+    		std::cerr << e.what() << std::endl;
+    		delete bus;
+    		exit(1);
     	}
-        if ((unsigned)devIndex >= devs.size()) {
-            std::cerr << "Can not use device " << devIndex
-                    << " because platform has only " << devs.size()
-                    << " devices (compat=" << compat[0].to_str() << ")" << std::endl;
-            delete bus;
-            exit(1);
-        } else {
-            dev_to_use.push_back(devs.at(devIndex));
-        }
     }
 
     assert(dev_to_use.size() > 0);
