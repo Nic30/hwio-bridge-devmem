@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     if (bus == nullptr) {
         throw std::runtime_error("Can not initialize HWIO");
     }
-    auto _bus = std::shared_ptr(bus);
+    std::unique_ptr<ihwio_bus> _bus(bus);
 
 
     std::vector<char *> nonOpts;
