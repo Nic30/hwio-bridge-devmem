@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <iostream>
+#include <memory>
 
 #include <hwio/hwio_comp_spec.h>
 #include <hwio/hwio_cli.h>
@@ -39,11 +40,6 @@ void print_help() {
 
 int main(int argc, char **argv) {
     int err = 0;
-    auto bus = hwio_init(argc, argv);
-    if (bus == nullptr) {
-        throw std::runtime_error("Can not initialize HWIO");
-    }
-
     int devIndex = -1;
     bool useAll = false;
     bool listAvailable = false;
@@ -54,10 +50,8 @@ int main(int argc, char **argv) {
             break;
         switch (opt) {
         case 'h':
-            delete bus;
             print_help();
-            exit(0);
-            break;
+            return 0;
 
         case 'A':
             useAll = true;
@@ -76,6 +70,13 @@ int main(int argc, char **argv) {
         }
     }
 
+    auto bus = hwio_init(argc, argv);
+    if (bus == nullptr) {
+        throw std::runtime_error("Can not initialize HWIO");
+    }
+    auto _bus = std::shared_ptr(bus);
+
+
     std::vector<char *> nonOpts;
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] != '-') {
@@ -89,8 +90,7 @@ int main(int argc, char **argv) {
         std::cerr << "[Error] at least compatibility string is required"
                 << std::endl;
         print_help();
-        delete bus;
-        exit(1);
+        return 1;
     }
 
     std::vector<ihwio_dev*> dev_to_use;
@@ -113,12 +113,14 @@ int main(int argc, char **argv) {
     		dev_to_use = hwio_select_devs_from_vector(devs, devIndex);
     	} catch (const std::exception& e) {
     		std::cerr << e.what() << std::endl;
-    		delete bus;
-    		exit(1);
+    		return 1;
     	}
     }
 
     assert(dev_to_use.size() > 0);
+    for(auto d: dev_to_use) {
+    	d->attach();
+    }
     if (nonOpts.size() >= 2 && nonOpts.size() <= 4) {
         hwio_phys_addr_t addr = std::stoll(nonOpts.at(1), 0, 0);
         uint64_t data = 0;
@@ -131,8 +133,7 @@ int main(int argc, char **argv) {
                 std::cerr << "[Error] WIDTH is in wrong format got:"
                         << nonOpts.at(2) << std::endl;
                 print_help();
-                delete bus;
-                exit(err);
+                return err;
             }
             size = _size / 8;
         }
@@ -166,6 +167,5 @@ int main(int argc, char **argv) {
         err = 1;
     }
 
-    delete bus;
     return err;
 }
