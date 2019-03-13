@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
                 d->read(addr, buff, size);
                 printf("0x");
                 for (int i = size - 1; i >= 0; i--) {
-                    printf("%" PRIx8, buff[i]);
+                    printf("%2" PRIx8, buff[i]);
                 }
                 printf("\n");
             }
