@@ -23,3 +23,8 @@ target_link_libraries(hwio-devmem hwio)
 
 # define installation
 install(TARGETS hwio-devmem DESTINATION bin)
+
+SET(CPACK_GENERATOR "DEB")
+SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Michal Orsak <michal.o.socials@gmail.com>")
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS "")
+INCLUDE(CPack)
